@@ -1,6 +1,6 @@
 <script>
   let player;
-  const VIDEO_ID = "CUdGsug9_iW2Wi9t"; // change this
+  const VIDEO_ID = "1Z9RImus3sU"; // change this
 
   let studySeconds = 0;
   let studyInterval = null;
