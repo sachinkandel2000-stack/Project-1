@@ -1,29 +1,82 @@
-let startTime = localStorage.getItem("milkStartTime");
+<script>
+  let player;
+  const VIDEO_ID = "CUdGsug9_iW2Wi9t"; // change this
 
-if (!startTime) {
-  startTime = Date.now();
-  localStorage.setItem("milkStartTime", startTime);
-}
+  let studySeconds = 0;
+  let studyInterval = null;
 
-function updateTimer() {
-  const now = Date.now();
-  const diff = now - startTime;
+  function formatTime(totalSeconds) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
-  const hours = Math.floor(diff / 1000 / 60 / 60);
-  const minutes = Math.floor((diff / 1000 / 60) % 60);
-  const seconds = Math.floor((diff / 1000) % 60);
+    return (
+      String(hours).padStart(2, "0") + ":" +
+      String(minutes).padStart(2, "0") + ":" +
+      String(seconds).padStart(2, "0")
+    );
+  }
 
-  document.getElementById("status").textContent = "Time since last milk:";
-  document.getElementById("timer").textContent =
-    `${String(hours).padStart(2, "0")}:` +
-    `${String(minutes).padStart(2, "0")}:` +
-    `${String(seconds).padStart(2, "0")}`;
-}
+  function updateStudyDisplay() {
+    document.getElementById("studyTimer").textContent = formatTime(studySeconds);
+  }
 
-function resetTimer() {
-  startTime = Date.now();
-  localStorage.setItem("Study Time Tracker", startTime);
-}
+  document.getElementById("startStudy").addEventListener("click", () => {
+    if (!studyInterval) {
+      studyInterval = setInterval(() => {
+        studySeconds++;
+        updateStudyDisplay();
+      }, 1000);
+    }
+  });
 
-setInterval(updateTimer, 1000);
-updateTimer();
+  document.getElementById("pauseStudy").addEventListener("click", () => {
+    clearInterval(studyInterval);
+    studyInterval = null;
+  });
+
+  document.getElementById("resetStudy").addEventListener("click", () => {
+    clearInterval(studyInterval);
+    studyInterval = null;
+    studySeconds = 0;
+    updateStudyDisplay();
+  });
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player("player", {
+      height: "1",
+      width: "1",
+      videoId: VIDEO_ID,
+      playerVars: {
+        autoplay: 0,
+        controls: 0
+      },
+      events: {
+        onReady: onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady() {
+    player.setVolume(50);
+    const data = player.getVideoData();
+    document.getElementById("songTitle").textContent = data.title || "Unknown track";
+  }
+
+  document.getElementById("playBtn").addEventListener("click", () => {
+    if (player) player.playVideo();
+  });
+
+  document.getElementById("pauseBtn").addEventListener("click", () => {
+    if (player) player.pauseVideo();
+  });
+
+  document.getElementById("volumeSlider").addEventListener("input", (e) => {
+    const volume = Number(e.target.value);
+    document.getElementById("volumeValue").textContent = volume;
+    if (player) player.setVolume(volume);
+  });
+
+  updateStudyDisplay();
+</script>
+<script src="https://www.youtube.com/iframe_api"></script>
